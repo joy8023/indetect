@@ -106,12 +106,12 @@ tar = []
 ut_tar = []
 
 samples = 10
-start = 10
+start = 0
 confidence = 0
 bs = 5
 mi = 1000
 
-filename = '80sample10bs5start10.pkl'
+filename = '80sample10bs5.pkl'
 utfile = 'ut_'+filename
 
 if __name__ == "__main__":
