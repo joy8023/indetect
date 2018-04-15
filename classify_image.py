@@ -322,7 +322,7 @@ class ImageNet:
   def __init__(self):
 #    for filename in os.listdir('./imgs/'):
 #      print(filename)
-    f = open('./tmp/pkl/5.pkl','rb')
+    f = open('./tmp/pkl/80.pkl','rb')
     imgset = pickle.load(f)
     f.close
 #    print(imgset.l)

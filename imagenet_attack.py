@@ -111,7 +111,7 @@ confidence = 0
 bs = 5
 mi = 1000
 
-filename = '5sample10bs5start10.pkl'
+filename = '80sample10bs5start10.pkl'
 utfile = 'ut_'+filename
 
 if __name__ == "__main__":
