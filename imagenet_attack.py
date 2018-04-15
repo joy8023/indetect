@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
 #        new_data=newdata(data.test_data[0:1000], data.test_labels[0:1000], data.test_data[0:1000], data.test_labels[0:1000] )
 
-        attack = CarliniL2(sess, model, batch_size=bs, max_iterations = im, confidence=confidence)
+        attack = CarliniL2(sess, model, batch_size=bs, max_iterations = mi, confidence=confidence)
 #        attack = CarliniL0(sess, model, max_iterations = mi)
 #        attack = CarliniLi(sess, model)
 
