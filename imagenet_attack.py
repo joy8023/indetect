@@ -26,10 +26,14 @@ class newdata:
         self.adv_data = np.array(ad)
         self.adv_label= np.array(al)
 
-        print(self.origin_data.shape)
+#        print(self.origin_data.shape)
         print(self.origin_label.shape)
-        print(self.adv_data.shape)
+#        print(self.adv_data.shape)
         print(self.adv_label.shape)
+
+    def add_target(self,target):
+        self.target = target
+        print(target)
 
 def show(img):
     """
@@ -42,7 +46,7 @@ def show(img):
     for i in range(28):
         print("".join([remap[int(round(x))] for x in img[i*28:i*28+28]]))
 
-def generate_data(model, data, samples, targeted=True, start=0, inception=False):
+def generate_data(model, data, samples, targeted=True, start=0, inception=False, batch_size = 10):
     """
     Generate the input data to the attack algorithm.
 
@@ -55,7 +59,7 @@ def generate_data(model, data, samples, targeted=True, start=0, inception=False)
     inputs = []
     targets = []
     for i in range(samples):
-        seq = random.sample(range(1,1001), 5)
+        seq = random.sample(range(1,1001), batch_size)
         print('target:',seq)
 
         for j in seq:
@@ -66,10 +70,9 @@ def generate_data(model, data, samples, targeted=True, start=0, inception=False)
 
     inputs = np.array(inputs)
     targets = np.array(targets)
-#    print(targets)
     idx = np.argmax(targets, axis = 1)
-    print(idx)
-    print(targets.shape)
+#    print(idx)
+#    print(targets.shape)
 
     return inputs, targets
 
@@ -99,29 +102,33 @@ adv_label = []
 ut_data = []
 ut_label = []
 
+tar = []
+ut_tar = []
+
 samples = 10
 start = 0
 confidence = 0
 bs = 5
-mi = 100
+mi = 1000
 
-filename = 'test.pkl'
+filename = '5sample10bs5.pkl'
 utfile = 'ut_'+filename
 
 if __name__ == "__main__":
     with tf.Session() as sess:
 
-
         data, model = ImageNet(), InceptionModel(sess)
         inputs, targets = generate_data(model, data, samples=samples, targeted=True,
-                                        start=start, inception=True)
+                                        start=start, inception=True, batch_size = bs)
+
+        tar = np.argmax(targets, axis = 1)
 
 #        evaluate(model.model, data.test_data[0:1000], data.test_labels[0:1000])
 
 #        new_data=newdata(data.test_data[0:1000], data.test_labels[0:1000], data.test_data[0:1000], data.test_labels[0:1000] )
 
-        attack = CarliniL2(sess, model, batch_size=bs, max_iterations = mi, confidence=confidence)
-#        attack = CarliniL0(sess, model)
+        attack = CarliniL2(sess, model, batch_size=bs, max_iterations = im, confidence=confidence)
+#        attack = CarliniL0(sess, model, max_iterations = mi)
 #        attack = CarliniLi(sess, model)
 
         timestart = time.time()
@@ -140,42 +147,22 @@ if __name__ == "__main__":
             temp = np.tile(np.array(inputs[i]),(bs,1,1,1))
             diff = np.array(adv[i*bs:i*bs+bs]) - temp
             noise = (diff**2).sum(axis = 3).sum(axis = 2).sum(axis = 1)
-#            print(noise)
             idx = np.argmin(noise)
-#            print(idx)
+
 
             print('*****************')
             ut_data.append(adv[i*bs+idx])
             ut_label.append(model.pred(adv[i*bs+idx:i*bs+idx+1], True))
+            ut_tar.append(tar[i*bs+idx])
             print('*****************')
 
         adv_data = np.reshape(adv_data,(samples*bs,299,299,3))
         adv_label = np.reshape(adv_label,(samples*bs,1008))
 
         ut_label = np.squeeze(np.array(ut_label))
-        print(ut_label.shape)
-
-        '''
-            min = np.sum((adv[i*bs]-inputs[i])**2)
-            idx=0
-
-
-            for j in range(bs):
-                adv_data.append(adv[i*bs+j])
-                adv_label.append(model.pred(adv[i*bs+j:i*bs+j+1]))
-                dist = np.sum((adv[i*bs+j]-inputs[i])**2)
-                if dist<min:
-#                    print(dist)
-                    min = dist
-                    idx = j
-
-            ut_data.append(adv[i*9+idx])
-            ut_label.append(model.pred(adv[i*bs+idx:i*bs+idx+1]))
-#            show(adv[i*9+idx])
-        '''
-            
+#        print(ut_label.shape)
+      
 '''
-
         for i in range(len(adv)):
 #            print("Valid:")
 #            show(inputs[i])
@@ -187,8 +174,10 @@ if __name__ == "__main__":
 '''
 
 new_data=newdata(origin_data, origin_label, adv_data, adv_label )
+new_data.add_target(tar)
 print('------------------')
 new_ut = newdata(origin_data, origin_label, ut_data, ut_label)
+new_ut.add_target(ut_tar)
 #print(ut_label)
 
 f = open(filename,'wb')
