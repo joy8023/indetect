@@ -111,7 +111,7 @@ confidence = 0
 bs = 5
 mi = 1000
 
-filename = '80sample10bs5.pkl'
+filename = '95sample10bs5.pkl'
 utfile = 'ut_'+filename
 
 if __name__ == "__main__":
@@ -138,8 +138,8 @@ if __name__ == "__main__":
         print("Took",timeend-timestart,"seconds to run",len(inputs),"samples.")
 
         for i in range(int(len(adv)/bs)):
-            origin_data.append(inputs[i])
-            origin_label.append(model.pred(inputs[i:i+1],True))
+            origin_data.append(inputs[i*bs])
+            origin_label.append(model.pred(inputs[i*bs:i*bs+1],True))
 
             adv_data.append(adv[i*bs:i*bs+bs])
             adv_label.append(model.pred(adv[i*bs:i*bs+bs], True))
