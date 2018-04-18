@@ -270,11 +270,10 @@ class InceptionModel:
                            {img: data[i]})
       predictions = np.squeeze(predictions)
       top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
-      print(top_k, predictions[1])
-      print(predictions[top_k[0]],predictions[top_k[1]],predictions[top_k[2]],predictions[top_k[3]],predictions[top_k[4]])
+
+      print(top_k, predictions[top_k[0]],predictions[top_k[1]],predictions[top_k[2]],predictions[top_k[3]],predictions[top_k[4]])
       output.append(predictions)
 
-#    print(len(output))
     return output
 
 class Imageset():
@@ -289,17 +288,16 @@ class ImageNet:
   def __init__(self):
 #    for filename in os.listdir('./imgs/'):
 #      print(filename)
-    f = open('./tmp/pkl/95.pkl','rb')
+    f = open('./tmp/50/1.pkl','rb')
     imgset = pickle.load(f)
     f.close
-#    print(imgset.l)
+
     self.origin_data = imgset.image
     self.train_data = imgset.image/255 - 0.5
     label = np.zeros(1008)
     label[imgset.l] = 1
     self.train_labels = np.tile(label, (imgset.num,1))
     print(self.train_labels.shape)
-#    print(self.train_labels[0][1])
 
 
 if __name__ == '__main__':

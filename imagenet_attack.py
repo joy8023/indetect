@@ -35,16 +35,6 @@ class newdata:
         self.target = target
         print(target)
 
-def show(img):
-    """
-    Show MNSIT digits in the console.
-    """
-    remap = "  .*#"+"#"*100
-    img = (img.flatten()+.5)*3
-    if len(img) != 784: return
-    print("START")
-    for i in range(28):
-        print("".join([remap[int(round(x))] for x in img[i*28:i*28+28]]))
 
 def generate_data(model, data, samples, targeted=True, start=0, inception=False, batch_size = 10):
     """
@@ -59,8 +49,8 @@ def generate_data(model, data, samples, targeted=True, start=0, inception=False,
     inputs = []
     targets = []
     for i in range(samples):
-        seq = random.sample(range(1,1001), batch_size)
-        print('target:',seq)
+        seq = random.sample(range(200,1001), batch_size)
+#        print('target:',seq)
 
         for j in seq:
             inputs.append(data.train_data[start+i])
@@ -71,8 +61,6 @@ def generate_data(model, data, samples, targeted=True, start=0, inception=False,
     inputs = np.array(inputs)
     targets = np.array(targets)
     idx = np.argmax(targets, axis = 1)
-#    print(idx)
-#    print(targets.shape)
 
     return inputs, targets
 
@@ -105,13 +93,13 @@ ut_label = []
 tar = []
 ut_tar = []
 
-samples = 10
+samples = 50
 start = 0
 confidence = 0
-bs = 5
+bs = 9
 mi = 1000
 
-filename = '95sample10bs5.pkl'
+filename = '1sample50bs9.pkl'
 utfile = 'ut_'+filename
 
 if __name__ == "__main__":
@@ -138,10 +126,10 @@ if __name__ == "__main__":
         print("Took",timeend-timestart,"seconds to run",len(inputs),"samples.")
 
         for i in range(int(len(adv)/bs)):
-            origin_data.append(inputs[i*bs])
+#            origin_data.append(inputs[i*bs])
             origin_label.append(model.pred(inputs[i*bs:i*bs+1],True))
 
-            adv_data.append(adv[i*bs:i*bs+bs])
+#            adv_data.append(adv[i*bs:i*bs+bs])
             adv_label.append(model.pred(adv[i*bs:i*bs+bs], True))
 
             temp = np.tile(np.array(inputs[i]),(bs,1,1,1))
@@ -149,14 +137,13 @@ if __name__ == "__main__":
             noise = (diff**2).sum(axis = 3).sum(axis = 2).sum(axis = 1)
             idx = np.argmin(noise)
 
-
-            print('*****************')
-            ut_data.append(adv[i*bs+idx])
+#            print('*****************')
+#            ut_data.append(adv[i*bs+idx])
             ut_label.append(model.pred(adv[i*bs+idx:i*bs+idx+1], True))
             ut_tar.append(tar[i*bs+idx])
-            print('*****************')
+#            print('*****************')
 
-        adv_data = np.reshape(adv_data,(samples*bs,299,299,3))
+#        adv_data = np.reshape(adv_data,(samples*bs,299,299,3))
         adv_label = np.reshape(adv_label,(samples*bs,1008))
 
         ut_label = np.squeeze(np.array(ut_label))
