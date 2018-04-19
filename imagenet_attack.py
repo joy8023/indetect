@@ -21,10 +21,11 @@ from li_attack import CarliniLi
 
 class newdata:
     def __init__(self, od, ol, ad, al):
-        self.origin_data = np.array(od)
+        self.origin_data = np.array(od).astype(np.uint8)
         self.origin_label= np.squeeze(np.array(ol))
-        self.adv_data = np.array(ad)
+        self.adv_data = np.array(ad).astype(np.uint8)
         self.adv_label= np.array(al)
+
 
 #        print(self.origin_data.shape)
         print(self.origin_label.shape)
@@ -93,14 +94,16 @@ ut_label = []
 tar = []
 ut_tar = []
 
-samples = 50
+samples = 10
 start = 0
 confidence = 0
 bs = 9
 mi = 1000
 
-filename = '1sample50bs9.pkl'
+#classification+samples+batch_size+start
+filename = '1s10bs9.pkl'
 utfile = 'ut_'+filename
+advname = 'adv_'+filename
 
 if __name__ == "__main__":
     with tf.Session() as sess:
@@ -111,10 +114,6 @@ if __name__ == "__main__":
 
         tar = np.argmax(targets, axis = 1)
 
-#        evaluate(model.model, data.test_data[0:1000], data.test_labels[0:1000])
-
-#        new_data=newdata(data.test_data[0:1000], data.test_labels[0:1000], data.test_data[0:1000], data.test_labels[0:1000] )
-
         attack = CarliniL2(sess, model, batch_size=bs, max_iterations = mi, confidence=confidence)
 #        attack = CarliniL0(sess, model, max_iterations = mi)
 #        attack = CarliniLi(sess, model)
@@ -123,13 +122,19 @@ if __name__ == "__main__":
         adv = attack.attack(inputs, targets)
         timeend = time.time()
 
+        advnp = np.array(adv).astype(np.uint8)
+
+        f = open(advname,'wb')
+        pickle.dump(advnp,f)
+        f.close
+
         print("Took",timeend-timestart,"seconds to run",len(inputs),"samples.")
 
         for i in range(int(len(adv)/bs)):
-#            origin_data.append(inputs[i*bs])
+            origin_data.append(inputs[i*bs])
             origin_label.append(model.pred(inputs[i*bs:i*bs+1],True))
 
-#            adv_data.append(adv[i*bs:i*bs+bs])
+            adv_data.append(adv[i*bs:i*bs+bs])
             adv_label.append(model.pred(adv[i*bs:i*bs+bs], True))
 
             temp = np.tile(np.array(inputs[i]),(bs,1,1,1))
@@ -138,27 +143,16 @@ if __name__ == "__main__":
             idx = np.argmin(noise)
 
 #            print('*****************')
-#            ut_data.append(adv[i*bs+idx])
+            ut_data.append(adv[i*bs+idx])
             ut_label.append(model.pred(adv[i*bs+idx:i*bs+idx+1], True))
             ut_tar.append(tar[i*bs+idx])
 #            print('*****************')
 
-#        adv_data = np.reshape(adv_data,(samples*bs,299,299,3))
+        adv_data = np.reshape(adv_data,(samples*bs,299,299,3))
         adv_label = np.reshape(adv_label,(samples*bs,1008))
 
         ut_label = np.squeeze(np.array(ut_label))
 #        print(ut_label.shape)
-      
-'''
-        for i in range(len(adv)):
-#            print("Valid:")
-#            show(inputs[i])
-#            print("Adversarial:")
-#            show(adv[i])
-
-#            print("Classification:", model.model.predict(adv[i:i+1]))
-#            print("Total distortion:", np.sum((adv[i]-inputs[i])**2)**.5)
-'''
 
 new_data=newdata(origin_data, origin_label, adv_data, adv_label )
 new_data.add_target(tar)

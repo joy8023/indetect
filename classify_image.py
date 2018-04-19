@@ -198,8 +198,6 @@ def main(_):
     model = InceptionModel(sess)
 #    for i in sess.graph.get_operations():
 #      print( i.name)
-
-
     model.pred(imgn.origin_data)
 
 #  image = ('./tmp/imagenet/kitfox.jpg')
@@ -226,12 +224,16 @@ class InceptionModel:
       CREATED_GRAPH = True
       self.graph = self.sess.graph.as_graph_def()
 
+    self.img = tf.placeholder(tf.uint8, (299,299,3))
+
+    self.softmax_tensor = tf.import_graph_def(
+            self.graph,
+            input_map={'DecodeJpeg:0': tf.reshape(self.img,((299,299,3)))},
+            return_elements=['softmax/logits:0'])
+
   def predict(self, data):
 
-#    img = tf.placeholder(tf.uint8, (299,299,3))
-#    n = 
-#    scaled = (0.5+tf.reshape(data,((299,299,3))))*255
-    print(data.shape)
+#    print(data.shape)
     scaled = (0.5+data)*255
     scaled = tf.cast(scaled, tf.float32)
     output = []
@@ -245,7 +247,6 @@ class InceptionModel:
       output.append(predictions)
     
     predictions = tf.convert_to_tensor(output)
-#     print(predictions.shape)
 
     return predictions
 
@@ -255,19 +256,11 @@ class InceptionModel:
       data = (data+0.5)*255
       data = data.astype(np.uint8)
 
-
-    img = tf.placeholder(tf.uint8, (299,299,3))
-
-    softmax_tensor = tf.import_graph_def(
-            self.graph,
-            input_map={'DecodeJpeg:0': tf.reshape(img,((299,299,3)))},
-            return_elements=['softmax/logits:0'])
-
     output = []
     for i in range(data.shape[0]):
 
-      predictions = self.sess.run(softmax_tensor,
-                           {img: data[i]})
+      predictions = self.sess.run(self.softmax_tensor,
+                           {self.img: data[i]})
       predictions = np.squeeze(predictions)
       top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
 
@@ -283,7 +276,6 @@ class Imageset():
     self.l = l
     self.num = 0
 
-
 class ImageNet:
   def __init__(self):
 #    for filename in os.listdir('./imgs/'):
@@ -298,7 +290,6 @@ class ImageNet:
     label[imgset.l] = 1
     self.train_labels = np.tile(label, (imgset.num,1))
     print(self.train_labels.shape)
-
 
 if __name__ == '__main__':
   tf.app.run()
