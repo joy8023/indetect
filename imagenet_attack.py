@@ -94,14 +94,14 @@ ut_label = []
 tar = []
 ut_tar = []
 
-samples = 10
-start = 0
+samples = 40
+start = 10
 confidence = 0
 bs = 9
 mi = 1000
 
 #classification+samples+batch_size+start
-filename = '1s10bs9.pkl'
+filename = '1s40bs9start10.pkl'
 utfile = 'ut_'+filename
 advname = 'adv_'+filename
 
@@ -131,10 +131,10 @@ if __name__ == "__main__":
         print("Took",timeend-timestart,"seconds to run",len(inputs),"samples.")
 
         for i in range(int(len(adv)/bs)):
-            origin_data.append(inputs[i*bs])
+#            origin_data.append(inputs[i*bs])
             origin_label.append(model.pred(inputs[i*bs:i*bs+1],True))
 
-            adv_data.append(adv[i*bs:i*bs+bs])
+#            adv_data.append(adv[i*bs:i*bs+bs])
             adv_label.append(model.pred(adv[i*bs:i*bs+bs], True))
 
             temp = np.tile(np.array(inputs[i]),(bs,1,1,1))
@@ -143,12 +143,12 @@ if __name__ == "__main__":
             idx = np.argmin(noise)
 
 #            print('*****************')
-            ut_data.append(adv[i*bs+idx])
+#            ut_data.append(adv[i*bs+idx])
             ut_label.append(model.pred(adv[i*bs+idx:i*bs+idx+1], True))
             ut_tar.append(tar[i*bs+idx])
 #            print('*****************')
 
-        adv_data = np.reshape(adv_data,(samples*bs,299,299,3))
+#        adv_data = np.reshape(adv_data,(samples*bs,299,299,3))
         adv_label = np.reshape(adv_label,(samples*bs,1008))
 
         ut_label = np.squeeze(np.array(ut_label))
