@@ -101,7 +101,7 @@ bs = 9
 mi = 1000
 
 #classification+samples+batch_size+start
-filename = '3s10bs9.pkl'
+filename = '5s10bs9.pkl'
 utfile = 'ut_'+filename
 advname = 'adv_'+filename
 
