@@ -94,14 +94,14 @@ ut_label = []
 tar = []
 ut_tar = []
 
-samples = 40
-start = 10
+samples = 10
+start = 0
 confidence = 0
 bs = 9
 mi = 1000
 
 #classification+samples+batch_size+start
-filename = '56s40bs9start 0.pkl'
+filename = '56s10bs9.pkl'
 utfile = 'ut_'+filename
 advname = 'adv_'+filename
 
